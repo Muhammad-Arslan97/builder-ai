@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import { GuestLyout, AuthLayout } from "./pages/Layout";
 
@@ -11,10 +11,18 @@ import PreviewPage from "./pages/PreviewPage";
 const App = () => {
   return (
     <Routes>
+
       {/* Login & Register Routes */}
       <Route element={<GuestLyout />}>
-        <Route path="/login" element={<AuthPage />} />
-        <Route path="/register" element={<AuthPage />} />
+        <Route
+          path="/login"
+          element={<AuthPage mode="login" />}
+        />
+
+        <Route
+          path="/register"
+          element={<AuthPage mode="register" />}
+        />
       </Route>
 
       {/* Protected Routes */}
@@ -23,6 +31,13 @@ const App = () => {
         <Route path="/builder/:id" element={<BuilderPage />} />
         <Route path="/preview/:id" element={<PreviewPage />} />
       </Route>
+
+      {/* Catch-all */}
+      <Route
+        path="*"
+        element={<Navigate to="/" replace />}
+      />
+
     </Routes>
   );
 };
