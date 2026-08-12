@@ -18,7 +18,7 @@ export function AppContextProvider({children}){
      const checkSession = async ()=>{
         try{
             const { data } = await api.get ("/api/auth/me");
-           // setUser(data.user);
+            setUser(data.user);
         } catch (error){
             setUser(null)
 
