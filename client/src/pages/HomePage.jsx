@@ -2,7 +2,8 @@ import React, { useEffect } from "react";
 import { useAppContext } from "../context/AppContext";
 import Promptinput from "../components/Promptinput";
 import { useNavigate } from "react-router-dom";
-import { ClockIcon } from "lucide-react";
+import { ArrowRightIcon, ClockIcon, Trash2Icon } from "lucide-react";
+import moment from "moment";
 
 const HomePage = () => {
   
@@ -142,15 +143,23 @@ const HomePage = () => {
                            <div className="flex items-center gap-3 mt-0.5">
                              <span>
                               <ClockIcon size={10}/>
-                              {p.updatedAt || p.createdAt}
+                              {moment( p.updatedAt || p.createdAt).fromNow()}
                              </span>
                              <span className="text-xs text-white/60 font-medium">v{p.version}
                              </span>
                            </div>
                         </div>
 
-                        <div>
-
+                        <div className="flex items-center gap-2">
+                             <button 
+                             onClick={(e)=>{
+                              e.stopPropagation();
+                              handleDelete(p._id)
+                             }}
+                             className="p-1.5 rounded-md text-zinc-200 hover:text-red-400 hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Trash2Icon size={14}/>
+                             </button>
+                             <ArrowRightIcon size={14} className="text-zinc-200 group-hover:text-white"/>
                         </div>
 
                       </div>
