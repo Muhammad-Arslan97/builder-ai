@@ -241,7 +241,28 @@ export function AppContextProvider({ children }) {
       }
     },
     [user]
-  );
+  )
+
+  const handleChat = useCallback(
+    async (prompt)=>{
+      if(!activeProjects || !userr) return;
+      setChatLoading(true)
+      try {
+        const { data } = await api.post(`/api/projects/${activeProjects._id}/chat`,{prompt});
+        setActiveProjects(data)
+        if(data.errors && data.errors.length > 0){
+          toast.error(`${data.errors.length} revision patch(es) failed`);
+        }else{
+          toast.success(`Updated to version ${data.version}`);
+        }
+      } catch (err){
+           console.error("Revision request failed:", err);
+           toast.error(err?.response?.data?.error || "Revision request failed");
+      }finally{
+          setChatLoading(false)
+      }
+    },[activeProjects, user]
+  )
 
   return (
     <AppContext.Provider
@@ -272,6 +293,7 @@ export function AppContextProvider({ children }) {
 
         handleGenerate,
         handleDelete,
+        logout
       }}
     >
       {children}
