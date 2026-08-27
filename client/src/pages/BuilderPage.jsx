@@ -6,6 +6,7 @@ import Loading from "../components/Loading";
 import { FolderTreeIcon, MessageSquareIcon } from "lucide-react";
 import ChatPanel from "../components/ChatPanel";
 import FileExplorer from "../components/FileExplorer";
+import PreviewPanel from "../components/PreviewPanel";
 
 const BuilderPage = () => {
   const { id } = useParams();
@@ -130,7 +131,7 @@ const BuilderPage = () => {
                   { activeProjects.status === "pending" || activeProjects.status === "generating" || activeProjects.status ==="failed" ? (
                     <Loading />
                   ) : (
-                    <p>PreviewPanel</p>
+                    <PreviewPanel projects={activeProjects} activeFile={activeFile} showCode={showCode}/>
                   )}
 
                 </div>

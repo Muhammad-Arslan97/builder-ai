@@ -8,6 +8,7 @@ import {
 import api from "../api/api";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import debounce from "lodash.debounce";
 
 const AppContext = createContext(undefined);
 
@@ -241,28 +242,72 @@ export function AppContextProvider({ children }) {
       }
     },
     [user]
-  )
+  );
 
+  // Chat / Revision
   const handleChat = useCallback(
-    async (prompt)=>{
-      if(!activeProjects || !userr) return;
-      setChatLoading(true)
+    async (prompt) => {
+      if (!activeProjects || !user) return;
+
+      setChatLoading(true);
+
       try {
-        const { data } = await api.post(`/api/projects/${activeProjects._id}/chat`,{prompt});
-        setActiveProjects(data)
-        if(data.errors && data.errors.length > 0){
-          toast.error(`${data.errors.length} revision patch(es) failed`);
-        }else{
+        const { data } = await api.post(
+          `/api/projects/${activeProjects._id}/chat`,
+          { prompt }
+        );
+
+        setActiveProjects(data);
+
+        if (data.errors && data.errors.length > 0) {
+          toast.error(
+            `${data.errors.length} revision patch(es) failed`
+          );
+        } else {
           toast.success(`Updated to version ${data.version}`);
         }
-      } catch (err){
-           console.error("Revision request failed:", err);
-           toast.error(err?.response?.data?.error || "Revision request failed");
-      }finally{
-          setChatLoading(false)
+      } catch (err) {
+        console.error("Revision request failed:", err);
+
+        toast.error(
+          err?.response?.data?.error ||
+            "Revision request failed"
+        );
+      } finally {
+        setChatLoading(false);
       }
-    },[activeProjects, user]
-  )
+    },
+    [activeProjects, user]
+  );
+
+  // Debounced auto-save
+  const [debouncedSave] = useState(() =>
+    debounce(async (files, id) => {
+      try {
+        await api.put(`/api/projects/${id}/files`, {
+          files,
+        });
+      } catch (err) {
+        console.error("Failed to auto-save files:", err);
+        toast.error("Failed to save code modification");
+      }
+    }, 1000)
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedSave.cancel();
+    };
+  }, [debouncedSave]);
+
+  const updateProjectFiles = useCallback(
+    async (files) => {
+      if (!activeProjects || !user) return;
+
+      debouncedSave(files, activeProjects._id);
+    },
+    [activeProjects, user, debouncedSave]
+  );
 
   return (
     <AppContext.Provider
@@ -293,7 +338,8 @@ export function AppContextProvider({ children }) {
 
         handleGenerate,
         handleDelete,
-        logout
+        handleChat,
+        updateProjectFiles,
       }}
     >
       {children}
